@@ -1,7 +1,15 @@
-[![Abcdspec-compliant](https://img.shields.io/badge/ABCD_Spec-v1.1-green.svg)](https://github.com/brain-life/abcd-spec)
-[![brainlife.io/app](https://img.shields.io/badge/brainlife.io-app-green.svg)](https://brainlife.io/app/5b2975d616fe38002748e79a)
+<h1 align="center">clever</h1>
 
-# app-clever
+<p align="center">
+  Flags outlying timepoints in an fMRI run with the clever R package (PCA leverage, robust distance and DVARS) for scrubbing and quality control, and outputs an outlier plot and table.
+</p>
+
+<p align="center">
+  <a href="https://github.com/brainlife/abcd-spec"><img src="https://img.shields.io/badge/ABCD_Spec-v1.1-green.svg" alt="ABCD Spec v1.1"></a>
+  <a href="https://doi.org/10.25663/bl.app.71"><img src="https://img.shields.io/badge/Brainlife-bl.app.71-blue.svg" alt="Run on brainlife.io"></a>
+</p>
+
+## At a glance
 
 <!-- brainlife-app:begin (generated from the App manifest; edit the manifest, not this block) -->
 
@@ -11,27 +19,27 @@ Masks the BOLD time series into a timepoints-by-voxels matrix, robustly normalis
 
 | | |
 |---|---|
-| 📥 **Inputs** | `neuro/func/task` · `neuro/mask` |
-| 📤 **Outputs** | `raw` |
-| 🐳 **Container** | `brainlife/clever:2.0` |
-| ⚙️ **Resources** | 8 CPUs · 31 GB memory · 15 h walltime |
-| 🔗 **Run it** | [doi.org/10.25663/bl.app.71](https://doi.org/10.25663/bl.app.71) |
+| **Inputs** | `neuro/func/task` · `neuro/mask` |
+| **Outputs** | `raw` |
+| **Container** | `brainlife/clever:2.0` |
+| **Resources** | 8 CPUs · 31 GB memory · 15 h walltime |
+| **Run it** | [doi.org/10.25663/bl.app.71](https://doi.org/10.25663/bl.app.71) |
 
-#### 📥 Inputs
+#### Inputs
 
 | Input | Datatype | Required | Description |
 |---|---|---|---|
 | `bold` | `neuro/func/task` | yes | The brain volume time-course to look for outlying timepoints in. |
 | `mask` | `neuro/mask` | yes | The whole brain mask. Voxels to be retained for analysis should be 1; voxels to be discarded should be 0. |
 
-#### 📤 Outputs
+#### Outputs
 
 | Output | Datatype | Description |
 |---|---|---|
 | `clever` | `raw` | Outlier detection for high-dimensional data. |
 
 <details>
-<summary><b>⚙️ Parameters</b> (16)</summary>
+<summary><b>Parameters</b> (16)</summary>
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
@@ -54,14 +62,47 @@ Masks the BOLD time series into a timepoints-by-voxels matrix, robustly normalis
 
 </details>
 
-📚 **References used by this App:**
-- Afyouni S, Nichols TE. Insight and inference for DVARS. NeuroImage (2018). [doi:10.1016/j.neuroimage.2017.12.098](https://doi.org/10.1016/j.neuroimage.2017.12.098)
-
 <!-- brainlife-app:end -->
 
-`clever` computes principal Components LEVERage (“CLEVER”) and other measures of outlyingness for high-dimensional data such as fMRI data. In BrainLife, it can be used for flagging timepoints which are likely to contain artifacts ("scrubbing") as well as general quality-control of fMRI data.
+## Running the App
 
-### How it works
+### On brainlife.io
+
+Open the App at [doi.org/10.25663/bl.app.71](https://doi.org/10.25663/bl.app.71), choose `neuro/func/task`, `neuro/mask` from your project, set the parameters and press **Execute**. The results are saved to your project as `raw`.
+
+### Locally
+
+You need [Singularity/Apptainer](https://apptainer.org/) (the App runs in `brainlife/clever:2.0`), [`jq`](https://jqlang.github.io/jq/).
+
+1. Clone this repository.
+2. Create `config.json` with the paths to your inputs and the parameters:
+
+   ```json
+   {
+       "bold": "/path/to/bold/bold",
+       "mask": "/path/to/mask/mask",
+       "projection": "variance",
+       "out_meas": "leverage",
+       "DVARS": "TRUE",
+       "detrend": "TRUE",
+       "kurt_quantile": "0.95",
+       "id_outliers": "TRUE",
+       "lev_cutoff": "4",
+       "rbd_cutoff": "0.9999",
+       "lev_images": "FALSE",
+       "verbose": "FALSE",
+       "main": "",
+       "sub": "",
+       "xlab": "",
+       "ylab": "",
+       "png": "cleverPlot.png",
+       "csv": "cleverTable.csv"
+   }
+   ```
+
+3. Run `./main`.
+
+## How it works
 
 As input, `clever` takes an fMRI volume `"bold.nii.gz"` and brain mask `"mask.nii.gz"`, and applies the mask to form a ***T*** timepoints by ***V*** voxels matrix, ***Y***. In our case, ***Y*** represents an fMRI run: each row is a vectorized volume, and each column represents one timepoint. Next, the algorithm performs the following steps: 
 
@@ -77,54 +118,36 @@ As input, `clever` takes an fMRI volume `"bold.nii.gz"` and brain mask `"mask.ni
 
 We also include the DVARS outlier detection method in `clever`. It normalizes the data as explained in step 1, but otherwise follows the algorithm as described in the [paper (Afyouni and Nichols, 2018)](doi.org/10.1016/j.neuroimage.2017.12.098) and implemented in the [MATLAB code](https://github.com/asoroosh/DVARS) provided by its authors.
 
-### Authors
+## Citing
 
-- [Amanda Mejia](afmejia@iu.edu)
-- [John Muschelli](jmusche1@jhu.edu)
-- [Damon Pham](ddpham@iu.edu)
+If you use this App, please cite it, the software it builds on and brainlife.io:
 
-### Funding Acknowledgement
+- clever. brainlife.io App. [doi:10.25663/bl.app.71](https://doi.org/10.25663/bl.app.71)
+- Afyouni S, Nichols TE. Insight and inference for DVARS. NeuroImage (2018). [doi:10.1016/j.neuroimage.2017.12.098](https://doi.org/10.1016/j.neuroimage.2017.12.098)
+- Hayashi S, Caron BA, Heinsfeld AS, et al. brainlife.io: a decentralized and open-source cloud platform to support neuroscience research. *Nature Methods* 21:809–813 (2024). [doi:10.1038/s41592-024-02237-2](https://doi.org/10.1038/s41592-024-02237-2)
+- Avesani P, McPherson B, Hayashi S, et al. The open diffusion data derivatives, brain data upcycling via integrated publishing of derivatives and reproducible open cloud services. *Scientific Data* 6:69 (2019). [doi:10.1038/s41597-019-0073-y](https://doi.org/10.1038/s41597-019-0073-y)
 
-brainlife.io is publicly funded and for the sustainability of the project it is helpful to Acknowledge the use of the platform. We kindly ask that you acknowledge the funding below in your publications and code reusing this code.
+## Authors
 
-[![NSF-BCS-1734853](https://img.shields.io/badge/NSF_BCS-1734853-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1734853)
-[![NSF-BCS-1636893](https://img.shields.io/badge/NSF_BCS-1636893-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1636893)
-[![NSF-ACI-1916518](https://img.shields.io/badge/NSF_ACI-1916518-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1916518)
-[![NSF-IIS-1912270](https://img.shields.io/badge/NSF_IIS-1912270-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1912270)
-[![NIH-NIBIB-R01EB029272](https://img.shields.io/badge/NIH_NIBIB-R01EB029272-green.svg)](https://grantome.com/grant/NIH/R01-EB029272-01)
+- Amanda Mejia
+- John Muschelli
+- Damon Pham
 
-### Citations
+## Funding
 
-We kindly ask that you cite the following articles when publishing papers and code using this code. 
+[![Wellcome-226486/Z/22/Z](https://img.shields.io/badge/Wellcome-226486%2FZ%2F22%2FZ-purple.svg)](https://wellcome.org/)
+[![NIH-NINDS-U24NS140384](https://img.shields.io/badge/NIH_NINDS-U24NS140384-green.svg)](https://reporter.nih.gov/project-details/11261037)
+[![NIH-NINDS-UM1NS132207](https://img.shields.io/badge/NIH_NINDS-UM1NS132207-green.svg)](https://reporter.nih.gov/project-details/11411328)
+[![NIH-NIBIB-R01EB029272](https://img.shields.io/badge/NIH_NIBIB-R01EB029272-green.svg)](https://reporter.nih.gov/project-details/10262925)
+[![NIH-NIBIB-R01EB030896](https://img.shields.io/badge/NIH_NIBIB-R01EB030896-green.svg)](https://reporter.nih.gov/project-details/10428625)
+[![NIH-NIMH-R01MH126699](https://img.shields.io/badge/NIH_NIMH-R01MH126699-green.svg)](https://reporter.nih.gov/project-details/10460628)
+[![NIH-NIDCD-R01DC020088](https://img.shields.io/badge/NIH_NIDCD-R01DC020088-green.svg)](https://reporter.nih.gov/project-details/11140284)
+[![NSF-BCS-1734853](https://img.shields.io/badge/NSF_BCS-1734853-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1734853)
+[![NSF-BCS-2203524](https://img.shields.io/badge/NSF_BCS-2203524-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2203524)
+[![NSF-IIS-1636893](https://img.shields.io/badge/NSF_IIS-1636893-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1636893)
+[![NSF-OAC-2148729](https://img.shields.io/badge/NSF_OAC-2148729-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2148729)
+[![NSF-IIS-1912270](https://img.shields.io/badge/NSF_IIS-1912270-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1912270)
+[![NSF-IIS-2148700](https://img.shields.io/badge/NSF_IIS-2148700-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2148700)
+[![NSF-OAC-1916518](https://img.shields.io/badge/NSF_OAC-1916518-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1916518)
 
-1. Avesani, P., McPherson, B., Hayashi, S. et al. The open diffusion data derivatives, brain data upcycling via integrated publishing of derivatives and reproducible open cloud services. Sci Data 6, 69 (2019). [https://doi.org/10.1038/s41597-019-0073-y](https://doi.org/10.1038/s41597-019-0073-y)
-
-# Running the App 
-
-### On Brainlife.io
-
-You can submit this App online at [https://doi.org/10.25663/bl.app.71](https://doi.org/10.25663/bl.app.71) via the "Execute" tab.
-
-### Running Locally (on your machine)
-
-For local use, we recommend using the R package directly. See the README at https://github.com/mandymejia/clever/tree/2.0 for installation instructions and a tutorial.
-
-### Sample Datasets
-
-`clever` includes two sample datasets, `Dat1` and `Dat2`. These are fMRI time series slices which have been vectorized (are ***T*** **x** ***V***).
-
-### Output
-
-All output files will be generated under the current working directory. The outputs of this App are `product.json` which plots the timecourse of each measure of outlyingness interactively using `plotly`, `cleverPlot.png` which plots the timecourse of each measure of outlyingness using the original plot method included with `clever`, and `cleverTable.csv` which stores each measure and outlier indication along the columns.
-
-### Dependencies
-
-This App only requires [singularity](https://www.sylabs.io/singularity/) to run. If you don't have singularity, you will need to install following dependencies.  
-
-  - R: https://www.r-project.org/
-  - The `clever` package itself: https://github.com/mandymejia/clever  
-  - R package "Imports" listed here: https://github.com/mandymejia/clever/blob/master/DESCRIPTION
-  - The `glmgen` R package: https://github.com/glmgen/glmgen
-  - These other R packges: `oro.nifti`, `rjson`, `ggplot2`, and `cowplot`.
-
-### GPL-v3 Copyright 
+<sub>brainlife.io, which runs this App, is publicly funded by Wellcome, the U.S. National Institutes of Health and the U.S. National Science Foundation; acknowledging that support helps keep it running.</sub>
